@@ -3085,3 +3085,81 @@ export const clearMemberTotpReq = async (
     return [null, e]
   }
 }
+
+// ===================== Telegram Bot =====================
+
+export const getTelegramSetupReq = async () => {
+  try {
+    const res = await request.get('/merchant/telegram/get_setup')
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const saveTelegramSetupReq = async (body: {
+  botToken: string
+  chatId: string
+  enabled: boolean
+}) => {
+  try {
+    const res = await request.post('/merchant/telegram/setup', body)
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const sendTelegramTestReq = async () => {
+  try {
+    const res = await request.post('/merchant/telegram/send_test', {})
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getTelegramTemplateListReq = async () => {
+  try {
+    const res = await request.get('/merchant/telegram/template_list')
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const updateTelegramTemplateReq = async (body: {
+  event: string
+  template: string
+}) => {
+  try {
+    const res = await request.post('/merchant/telegram/template_update', body)
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const previewTelegramTemplateReq = async (body: {
+  event: string
+  template: string
+}) => {
+  try {
+    const res = await request.post('/merchant/telegram/template_preview', body)
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}

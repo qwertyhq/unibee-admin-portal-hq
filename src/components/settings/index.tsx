@@ -12,6 +12,7 @@ import Permissions from './permissions'
 import { SubscriptionConfig } from './subscriptionConfig'
 import WebhookList from './webHooks/list'
 import MultiCurrencyConfiguration from './multiCurrencyConfig'
+import TelegramSettings from './telegramSettings'
 
 const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -58,6 +59,11 @@ const Index = () => {
       key: 'emailSettings',
       label: 'Email Settings',
       children: <EmailSettings />
+    },
+    {
+      key: 'telegram',
+      label: 'Telegram Bot',
+      children: <TelegramSettings />
     }
   ]
   const onTabChange = (key: string) => {
