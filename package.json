@@ -20,6 +20,7 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@types/dompurify": "^3.0.5",
+    "@xyflow/react": "^12.10.0",
     "antd": "^5.22.1",
     "axios": "^1.13.2",
     "dinero.js": "^1.9.1",

@@ -10,7 +10,9 @@ import {
   PlayCircleOutlined,
   SaveOutlined,
   CheckCircleOutlined,
-  WarningOutlined
+  WarningOutlined,
+  CodeOutlined,
+  ApartmentOutlined
 } from '@ant-design/icons'
 import {
   Alert,
@@ -22,6 +24,7 @@ import {
   Input,
   message,
   Row,
+  Segmented,
   Select,
   Space,
   Spin,
@@ -29,7 +32,7 @@ import {
   Tooltip,
   Typography
 } from 'antd'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Scenario,
@@ -39,6 +42,7 @@ import {
   WEBHOOK_EVENTS,
   UNIBEE_API_ACTIONS
 } from './types'
+import { FlowEditor } from './flowEditor'
 
 const { TextArea } = Input
 const { Text } = Typography
@@ -71,6 +75,8 @@ export const ScenarioDetail = () => {
   const [jsonError, setJsonError] = useState<string | null>(null)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
   const [form] = Form.useForm()
+  const [viewMode, setViewMode] = useState<'json' | 'visual'>('json')
+  const dslRef = useRef<ScenarioDSL>(DEFAULT_DSL)
 
   const goBack = () => navigate('/scenario/list')
 
@@ -135,7 +141,16 @@ export const ScenarioDetail = () => {
   }
 
   const handleSave = async () => {
-    if (jsonError) {
+    // If in visual mode, sync DSL back to JSON first
+    const currentJson =
+      viewMode === 'visual'
+        ? JSON.stringify(dslRef.current, null, 2)
+        : jsonText
+    if (viewMode === 'visual') {
+      setJsonText(currentJson)
+      setJsonError(null)
+    }
+    if (jsonError && viewMode === 'json') {
       message.error('Fix JSON syntax errors first')
       return
     }
@@ -152,7 +167,7 @@ export const ScenarioDetail = () => {
       const [res, err] = await createScenarioReq({
         name,
         description,
-        scenarioJson: jsonText
+        scenarioJson: currentJson
       })
       setLoading(false)
       if (err) {
@@ -171,7 +186,7 @@ export const ScenarioDetail = () => {
         scenarioId: Number(scenarioId),
         name,
         description,
-        scenarioJson: jsonText
+        scenarioJson: currentJson
       })
       setLoading(false)
       if (err) {
@@ -206,6 +221,39 @@ export const ScenarioDetail = () => {
     }
   }
 
+  // Sync DSL ref from JSON
+  useEffect(() => {
+    try {
+      dslRef.current = JSON.parse(jsonText) as ScenarioDSL
+    } catch {
+      // keep old ref
+    }
+  }, [jsonText])
+
+  // Switch between JSON and Visual mode
+  const handleViewModeChange = (mode: string | number) => {
+    const newMode = mode as 'json' | 'visual'
+    if (newMode === 'visual') {
+      // Parse current JSON into DSL for the visual editor
+      try {
+        dslRef.current = JSON.parse(jsonText) as ScenarioDSL
+      } catch {
+        message.error('Fix JSON errors before switching to visual editor')
+        return
+      }
+    } else {
+      // Sync visual changes back to JSON
+      setJsonText(JSON.stringify(dslRef.current, null, 2))
+      setJsonError(null)
+    }
+    setViewMode(newMode)
+  }
+
+  // Flow editor onChange callback
+  const handleFlowChange = useCallback((newDsl: ScenarioDSL) => {
+    dslRef.current = newDsl
+  }, [])
+
   // Try to extract summary from JSON
   let dslSummary: ScenarioDSL | null = null
   try {
@@ -225,6 +273,14 @@ export const ScenarioDetail = () => {
           <h2 className="text-lg font-semibold m-0">
             {isNew ? 'New Scenario' : `Edit: ${scenario?.name ?? ''}`}
           </h2>
+          <Segmented
+            value={viewMode}
+            onChange={handleViewModeChange}
+            options={[
+              { label: 'JSON', value: 'json', icon: <CodeOutlined /> },
+              { label: 'Visual', value: 'visual', icon: <ApartmentOutlined /> }
+            ]}
+          />
         </Space>
         <Space>
           {!isNew && (
@@ -239,6 +295,35 @@ export const ScenarioDetail = () => {
         </Space>
       </div>
 
+      {viewMode === 'visual' ? (
+        <Row gutter={16}>
+          <Col span={16}>
+            <Card title="Visual Flow Editor" size="small">
+              <FlowEditor dsl={dslRef.current} onChange={handleFlowChange} />
+            </Card>
+          </Col>
+          <Col span={8}>
+            <Card title="Scenario Info" size="small" className="mb-4">
+              <Form
+                form={form}
+                layout="vertical"
+                initialValues={{ name: '', description: '' }}
+              >
+                <Form.Item
+                  name="name"
+                  label="Name"
+                  rules={[{ required: true, message: 'Name is required' }]}
+                >
+                  <Input placeholder="My Scenario" />
+                </Form.Item>
+                <Form.Item name="description" label="Description">
+                  <TextArea rows={2} placeholder="Brief description..." />
+                </Form.Item>
+              </Form>
+            </Card>
+          </Col>
+        </Row>
+      ) : (
       <Row gutter={16}>
         {/* Left: JSON Editor */}
         <Col span={16}>
@@ -425,6 +510,7 @@ export const ScenarioDetail = () => {
           </Card>
         </Col>
       </Row>
+      )}
     </div>
   )
 }

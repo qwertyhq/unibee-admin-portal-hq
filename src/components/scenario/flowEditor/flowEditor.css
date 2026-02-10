@@ -1,0 +1,144 @@
+/* Scenario Flow Editor styles */
+
+.flow-editor {
+  display: flex;
+  height: 600px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fafafa;
+}
+
+.flow-editor .react-flow__node {
+  font-size: 12px;
+}
+
+.flow-editor .reactflow-wrapper {
+  flex: 1;
+  height: 100%;
+}
+
+/* Sidebar / Palette */
+.flow-palette {
+  width: 200px;
+  border-right: 1px solid #e8e8e8;
+  padding: 12px;
+  background: #fff;
+  overflow-y: auto;
+}
+
+.flow-palette h4 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.flow-palette-item {
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  cursor: grab;
+  font-size: 12px;
+  background: #fff;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flow-palette-item:hover {
+  border-color: #1677ff;
+  background: #f0f5ff;
+}
+
+.flow-palette-item:active {
+  cursor: grabbing;
+}
+
+/* Custom nodes */
+.scenario-node {
+  min-width: 160px;
+  border-radius: 6px;
+  font-size: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.scenario-node .node-header {
+  padding: 6px 10px;
+  border-radius: 6px 6px 0 0;
+  font-weight: 600;
+  font-size: 11px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.scenario-node .node-body {
+  padding: 8px 10px;
+  background: #fff;
+  border-radius: 0 0 6px 6px;
+  border: 1px solid #e8e8e8;
+  border-top: none;
+  min-height: 24px;
+}
+
+.scenario-node .node-body .node-label {
+  color: #333;
+  font-size: 11px;
+  word-break: break-word;
+}
+
+.scenario-node .node-body .node-detail {
+  color: #999;
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+/* Trigger node */
+.scenario-node.trigger .node-header {
+  background: #389e0d;
+}
+
+/* Action nodes */
+.scenario-node.send_telegram .node-header {
+  background: #1677ff;
+}
+.scenario-node.http_request .node-header {
+  background: #722ed1;
+}
+.scenario-node.unibee_api .node-header {
+  background: #fa8c16;
+}
+.scenario-node.send_email .node-header {
+  background: #eb2f96;
+}
+.scenario-node.set_variable .node-header {
+  background: #13c2c2;
+}
+.scenario-node.log .node-header {
+  background: #8c8c8c;
+}
+
+/* Condition node */
+.scenario-node.condition .node-header {
+  background: #faad14;
+}
+
+/* Delay node */
+.scenario-node.delay .node-header {
+  background: #fa541c;
+}
+
+/* Selected */
+.scenario-node.selected {
+  outline: 2px solid #1677ff;
+  outline-offset: 2px;
+}
+
+/* Handle styles */
+.react-flow__handle {
+  width: 8px;
+  height: 8px;
+}
