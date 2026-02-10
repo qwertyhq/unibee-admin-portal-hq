@@ -1,144 +1,340 @@
-/* Scenario Flow Editor styles */
+/* ============================================================
+   n8n-style Scenario Flow Editor
+   ============================================================ */
 
-.flow-editor {
+.flow-editor-container {
   display: flex;
-  height: 600px;
-  border: 1px solid #e8e8e8;
+  height: 640px;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
   overflow: hidden;
-  background: #fafafa;
+  background: #f5f5f5;
 }
 
-.flow-editor .react-flow__node {
-  font-size: 12px;
-}
-
-.flow-editor .reactflow-wrapper {
+.flow-editor-container .reactflow-wrapper {
   flex: 1;
   height: 100%;
 }
 
-/* Sidebar / Palette */
+/* ---- Palette (left sidebar) ---- */
 .flow-palette {
-  width: 200px;
-  border-right: 1px solid #e8e8e8;
-  padding: 12px;
+  width: 220px;
+  border-right: 1px solid #e0e0e0;
+  padding: 16px 12px;
   background: #fff;
   overflow-y: auto;
 }
 
-.flow-palette h4 {
+.flow-palette-section {
+  margin-bottom: 16px;
+}
+
+.flow-palette-section h4 {
   margin: 0 0 8px 0;
-  font-size: 13px;
-  color: #666;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8c8c8c;
 }
 
 .flow-palette-item {
-  padding: 6px 10px;
-  margin-bottom: 4px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  cursor: grab;
-  font-size: 12px;
-  background: #fff;
-  transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: grab;
+  font-size: 13px;
+  color: #333;
+  background: #fafafa;
+  transition: all 0.15s ease;
+  user-select: none;
 }
 
 .flow-palette-item:hover {
-  border-color: #1677ff;
-  background: #f0f5ff;
+  border-color: #d9d9d9;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .flow-palette-item:active {
   cursor: grabbing;
+  transform: scale(0.98);
 }
 
-/* Custom nodes */
-.scenario-node {
-  min-width: 160px;
+.flow-palette-item .palette-icon {
+  width: 28px;
+  height: 28px;
   border-radius: 6px;
-  font-size: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-.scenario-node .node-header {
-  padding: 6px 10px;
-  border-radius: 6px 6px 0 0;
-  font-weight: 600;
-  font-size: 11px;
-  color: #fff;
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
-.scenario-node .node-body {
-  padding: 8px 10px;
+/* ---- n8n-style Node ---- */
+.n8n-node {
+  min-width: 180px;
+  max-width: 240px;
   background: #fff;
-  border-radius: 0 0 6px 6px;
-  border: 1px solid #e8e8e8;
-  border-top: none;
-  min-height: 24px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  position: relative;
 }
 
-.scenario-node .node-body .node-label {
-  color: #333;
+.n8n-node:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.n8n-node.selected {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Color accent strip on left */
+.n8n-node .node-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 8px 0 0 8px;
+}
+
+.n8n-node .node-content {
+  padding: 10px 12px 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.n8n-node .node-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.n8n-node .node-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.n8n-node .node-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.n8n-node .node-subtitle {
   font-size: 11px;
-  word-break: break-word;
-}
-
-.scenario-node .node-body .node-detail {
-  color: #999;
-  font-size: 10px;
+  color: #8c8c8c;
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Trigger node */
-.scenario-node.trigger .node-header {
-  background: #389e0d;
-}
-
-/* Action nodes */
-.scenario-node.send_telegram .node-header {
-  background: #1677ff;
-}
-.scenario-node.http_request .node-header {
-  background: #722ed1;
-}
-.scenario-node.unibee_api .node-header {
-  background: #fa8c16;
-}
-.scenario-node.send_email .node-header {
-  background: #eb2f96;
-}
-.scenario-node.set_variable .node-header {
-  background: #13c2c2;
-}
-.scenario-node.log .node-header {
-  background: #8c8c8c;
-}
-
-/* Condition node */
-.scenario-node.condition .node-header {
-  background: #faad14;
-}
-
-/* Delay node */
-.scenario-node.delay .node-header {
-  background: #fa541c;
-}
-
-/* Selected */
-.scenario-node.selected {
-  outline: 2px solid #1677ff;
-  outline-offset: 2px;
-}
-
-/* Handle styles */
-.react-flow__handle {
+/* Status dot */
+.n8n-node .node-status {
   width: 8px;
   height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Condition node — dual outputs */
+.n8n-node.condition-node .node-outputs {
+  display: flex;
+  border-top: 1px solid #f0f0f0;
+  font-size: 10px;
+  text-align: center;
+}
+
+.n8n-node.condition-node .node-output-label {
+  flex: 1;
+  padding: 4px 0;
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.n8n-node.condition-node .node-output-label.yes {
+  color: #389e0d;
+  border-right: 1px solid #f0f0f0;
+}
+
+.n8n-node.condition-node .node-output-label.no {
+  color: #cf1322;
+}
+
+/* ---- Accent colors per type ---- */
+.accent-trigger { background: #389e0d; }
+.accent-send_telegram { background: #1677ff; }
+.accent-http_request { background: #722ed1; }
+.accent-unibee_api { background: #fa8c16; }
+.accent-send_email { background: #eb2f96; }
+.accent-set_variable { background: #13c2c2; }
+.accent-log { background: #8c8c8c; }
+.accent-condition { background: #faad14; }
+.accent-delay { background: #fa541c; }
+
+/* Icon backgrounds */
+.icon-bg-trigger { background: #f6ffed; }
+.icon-bg-send_telegram { background: #e6f4ff; }
+.icon-bg-http_request { background: #f9f0ff; }
+.icon-bg-unibee_api { background: #fff7e6; }
+.icon-bg-send_email { background: #fff0f6; }
+.icon-bg-set_variable { background: #e6fffb; }
+.icon-bg-log { background: #fafafa; }
+.icon-bg-condition { background: #fffbe6; }
+.icon-bg-delay { background: #fff2e8; }
+
+/* Execution state */
+.n8n-node.exec-running { border-color: #1677ff; }
+.n8n-node.exec-running .node-status { background: #1677ff; animation: pulse 1.5s infinite; }
+.n8n-node.exec-success { border-color: #52c41a; }
+.n8n-node.exec-success .node-status { background: #52c41a; }
+.n8n-node.exec-failed { border-color: #ff4d4f; }
+.n8n-node.exec-failed .node-status { background: #ff4d4f; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ---- React Flow handle overrides ---- */
+.n8n-node .react-flow__handle {
+  width: 10px;
+  height: 10px;
+  border: 2px solid #d9d9d9;
+  background: #fff;
+  transition: all 0.15s ease;
+}
+
+.n8n-node .react-flow__handle:hover {
+  border-color: #1677ff;
+  background: #e6f4ff;
+  transform: scale(1.3);
+}
+
+.n8n-node .react-flow__handle-top { top: -5px; }
+.n8n-node .react-flow__handle-bottom { bottom: -5px; }
+
+/* Condition handles */
+.n8n-node .handle-yes {
+  border-color: #b7eb8f;
+}
+.n8n-node .handle-yes:hover {
+  border-color: #52c41a;
+  background: #f6ffed;
+}
+.n8n-node .handle-no {
+  border-color: #ffa39e;
+}
+.n8n-node .handle-no:hover {
+  border-color: #ff4d4f;
+  background: #fff2f0;
+}
+
+/* ---- Context Menu ---- */
+.flow-context-menu {
+  position: absolute;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  padding: 4px 0;
+  min-width: 160px;
+}
+
+.flow-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.flow-context-menu-item:hover {
+  background: #f5f5f5;
+}
+
+.flow-context-menu-item.danger {
+  color: #ff4d4f;
+}
+
+.flow-context-menu-item.danger:hover {
+  background: #fff2f0;
+}
+
+.flow-context-menu-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 4px 0;
+}
+
+/* ---- Custom Edge (delete button) ---- */
+.edge-delete-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  color: #999;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  pointer-events: all;
+}
+
+.edge-delete-btn:hover {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+}
+
+/* ---- Right config panel ---- */
+.flow-config-panel {
+  width: 300px;
+  border-left: 1px solid #e0e0e0;
+  background: #fff;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.flow-config-panel .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.flow-config-panel .panel-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1a1a1a;
 }

@@ -934,6 +934,18 @@
   resolved "https://registry.npmmirror.com/@ctrl/tinycolor/-/tinycolor-3.6.1.tgz"
   integrity sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==
 
+"@dagrejs/dagre@^2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@dagrejs/dagre/-/dagre-2.0.4.tgz#3c279dfbc5c4aa6c7b53601ea33d3600c87ab341"
+  integrity sha512-J6vCWTNpicHF4zFlZG1cS5DkGzMr9941gddYkakjrg3ZNev4bbqEgLHFTWiFrcJm7UCRu7olO3K6IRDd9gSGhA==
+  dependencies:
+    "@dagrejs/graphlib" "3.0.4"
+
+"@dagrejs/graphlib@3.0.4":
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/@dagrejs/graphlib/-/graphlib-3.0.4.tgz#0b0adf4c148fa703762b314c4fe35cd66821adcc"
+  integrity sha512-HxZ7fCvAwTLCWCO0WjDkzAFQze8LdC6iOpKbetDKHIuDfIgMlIzYzqZ4nxwLlclQX+3ZVeZ1K2OuaOE2WWcyOg==
+
 "@dnd-kit/accessibility@^3.1.0":
   version "3.1.0"
   resolved "https://mirrors.cloud.tencent.com/npm/@dnd-kit/accessibility/-/accessibility-3.1.0.tgz"
@@ -2006,6 +2018,11 @@
   dependencies:
     "@types/d3-interpolate" "*"
     "@types/d3-selection" "*"
+
+"@types/dagre@^0.7.53":
+  version "0.7.53"
+  resolved "https://registry.yarnpkg.com/@types/dagre/-/dagre-0.7.53.tgz#4dab441bf31b6fb08af0b3e2a3f5ab0c0217a701"
+  integrity sha512-f4gkWqzPZvYmKhOsDnhq/R8mO4UMcKdxZo+i5SCkOU1wvGeHJeUXGIHeE9pnwGyPMDof1Vx5ZQo4nxpeg2TTVQ==
 
 "@types/dinero.js@^1.9.4":
   version "1.9.4"

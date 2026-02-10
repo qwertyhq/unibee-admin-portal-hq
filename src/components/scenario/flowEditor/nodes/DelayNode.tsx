@@ -5,21 +5,27 @@ export type DelayNodeData = {
   label: string
   stepId: string
   duration: string
+  execState?: 'running' | 'success' | 'failed'
 }
 
 type DelayNodeType = Node<DelayNodeData, 'delay'>
 
 const DelayNode: React.FC<NodeProps<DelayNodeType>> = ({ data, selected }) => {
+  const execCls = data.execState ? `exec-${data.execState}` : ''
+
   return (
-    <div className={`scenario-node delay ${selected ? 'selected' : ''}`}>
+    <div className={`n8n-node ${selected ? 'selected' : ''} ${execCls}`}>
+      <div className="node-accent accent-delay" />
       <Handle type="target" position={Position.Top} />
-      <div className="node-header">
-        <span>⏳</span>
-        <span>Delay</span>
-      </div>
-      <div className="node-body">
-        <div className="node-label">{data.label || data.stepId}</div>
-        {data.duration && <div className="node-detail">Wait {data.duration}</div>}
+      <div className="node-content">
+        <div className="node-icon icon-bg-delay">⏳</div>
+        <div className="node-info">
+          <div className="node-title">{data.label || 'Delay'}</div>
+          <div className="node-subtitle">
+            {data.duration ? `Wait ${data.duration}` : 'Configure duration'}
+          </div>
+        </div>
+        {data.execState && <div className="node-status" />}
       </div>
       <Handle type="source" position={Position.Bottom} />
     </div>

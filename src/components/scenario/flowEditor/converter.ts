@@ -1,6 +1,9 @@
 /**
  * Bidirectional converter: ScenarioDSL <-> React Flow nodes & edges
+ * Uses dagre for automatic hierarchical layout
  */
+import dagre from '@dagrejs/dagre'
+import { Position } from '@xyflow/react'
 import type { Node, Edge } from '@xyflow/react'
 import type { ScenarioDSL, StepDSL, StepType } from '../types'
 import type { TriggerNodeData } from './nodes/TriggerNode'
@@ -8,33 +11,83 @@ import type { ActionNodeData } from './nodes/ActionNode'
 import type { ConditionNodeData } from './nodes/ConditionNode'
 import type { DelayNodeData } from './nodes/DelayNode'
 
-const NODE_Y_GAP = 120
-const NODE_X = 300
-const BRANCH_X_OFFSET = 200
+const NODE_WIDTH = 200
+const NODE_HEIGHT = 60
+const CONDITION_HEIGHT = 80
 
 /* ============================================================
- *  DSL -> Flow
+ *  Dagre auto-layout
  * ============================================================ */
-export function dslToFlow(dsl: ScenarioDSL): { nodes: Node[]; edges: Edge[] } {
+export type LayoutDirection = 'TB' | 'LR'
+
+export function applyDagreLayout(
+  nodes: Node[],
+  edges: Edge[],
+  direction: LayoutDirection = 'TB'
+): { nodes: Node[]; edges: Edge[] } {
+  const g = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}))
+  const isHorizontal = direction === 'LR'
+
+  g.setGraph({
+    rankdir: direction,
+    nodesep: 60,
+    ranksep: 80,
+    marginx: 20,
+    marginy: 20
+  })
+
+  nodes.forEach((node) => {
+    const h = node.type === 'condition' ? CONDITION_HEIGHT : NODE_HEIGHT
+    g.setNode(node.id, { width: NODE_WIDTH, height: h })
+  })
+
+  edges.forEach((edge) => {
+    g.setEdge(edge.source, edge.target)
+  })
+
+  dagre.layout(g)
+
+  const layoutedNodes = nodes.map((node) => {
+    const pos = g.node(node.id)
+    const h = node.type === 'condition' ? CONDITION_HEIGHT : NODE_HEIGHT
+    return {
+      ...node,
+      targetPosition: isHorizontal ? Position.Left : Position.Top,
+      sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
+      position: {
+        x: pos.x - NODE_WIDTH / 2,
+        y: pos.y - h / 2
+      }
+    }
+  })
+
+  return { nodes: layoutedNodes, edges }
+}
+
+/* ============================================================
+ *  DSL -> Flow (with dagre layout)
+ * ============================================================ */
+export function dslToFlow(
+  dsl: ScenarioDSL,
+  direction: LayoutDirection = 'TB'
+): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = []
   const edges: Edge[] = []
 
   // 1. Trigger node
   const triggerId = '__trigger__'
-  const triggerNode: Node<TriggerNodeData> = {
+  nodes.push({
     id: triggerId,
     type: 'trigger',
-    position: { x: NODE_X, y: 0 },
+    position: { x: 0, y: 0 },
     data: {
       label: dsl.trigger?.type || 'Trigger',
       triggerType: dsl.trigger?.type || 'manual',
       event: dsl.trigger?.event || ''
-    }
-  }
-  nodes.push(triggerNode)
+    } as TriggerNodeData
+  })
 
-  // 2. Steps — linear layout with condition branches
-  let y = NODE_Y_GAP
+  // 2. Steps — build linear chain + condition branches
   let prevId = triggerId
   let prevHandle: string | undefined
 
@@ -42,34 +95,25 @@ export function dslToFlow(dsl: ScenarioDSL): { nodes: Node[]; edges: Edge[] } {
     const nodeId = step.id || `step_${nodes.length}`
 
     if (step.type === 'condition') {
-      const cNode = makeConditionNode(nodeId, step, NODE_X, y)
-      nodes.push(cNode)
+      nodes.push(makeConditionNode(nodeId, step))
       edges.push(makeEdge(prevId, nodeId, prevHandle))
       prevId = nodeId
-      prevHandle = 'true' // continue from "true" branch by default
-
-      // If there are on_true / on_false sub-steps, we note them but
-      // keep the main flow going through the "true" branch.
-      // The visual shows two handles; the user connects branches manually.
-      y += NODE_Y_GAP
+      prevHandle = 'true'
     } else if (step.type === 'delay') {
-      const dNode = makeDelayNode(nodeId, step, NODE_X, y)
-      nodes.push(dNode)
+      nodes.push(makeDelayNode(nodeId, step))
       edges.push(makeEdge(prevId, nodeId, prevHandle))
       prevId = nodeId
       prevHandle = undefined
-      y += NODE_Y_GAP
     } else {
-      const aNode = makeActionNode(nodeId, step, NODE_X, y)
-      nodes.push(aNode)
+      nodes.push(makeActionNode(nodeId, step))
       edges.push(makeEdge(prevId, nodeId, prevHandle))
       prevId = nodeId
       prevHandle = undefined
-      y += NODE_Y_GAP
     }
   }
 
-  return { nodes, edges }
+  // 3. Apply dagre layout
+  return applyDagreLayout(nodes, edges, direction)
 }
 
 /* ============================================================
@@ -80,11 +124,10 @@ export function flowToDsl(
   edges: Edge[],
   baseDsl: Partial<ScenarioDSL>
 ): ScenarioDSL {
-  // Find trigger node
   const triggerNode = nodes.find((n) => n.type === 'trigger')
   const triggerData = (triggerNode?.data || {}) as TriggerNodeData
 
-  // Build adjacency from edges
+  // Adjacency list
   const adj = new Map<string, { target: string; sourceHandle?: string }[]>()
   for (const e of edges) {
     const list = adj.get(e.source) || []
@@ -92,7 +135,7 @@ export function flowToDsl(
     adj.set(e.source, list)
   }
 
-  // Walk the graph from trigger in topological order (DFS)
+  // Topological walk from trigger
   const steps: StepDSL[] = []
   const visited = new Set<string>()
 
@@ -102,7 +145,6 @@ export function flowToDsl(
 
     const node = nodes.find((n) => n.id === nodeId)
     if (!node || node.type === 'trigger') {
-      // skip trigger, just follow edges
       const children = adj.get(nodeId) || []
       for (const child of children) walk(child.target)
       return
@@ -111,7 +153,7 @@ export function flowToDsl(
     const step = nodeToStep(node)
     if (step) steps.push(step)
 
-    // Follow edges — for conditions, true branch first
+    // Follow edges — true branch first for conditions
     const children = (adj.get(nodeId) || []).sort((a, b) => {
       if (a.sourceHandle === 'true') return -1
       if (b.sourceHandle === 'true') return 1
@@ -120,8 +162,7 @@ export function flowToDsl(
     for (const child of children) walk(child.target)
   }
 
-  const triggerId = triggerNode?.id || '__trigger__'
-  walk(triggerId)
+  walk(triggerNode?.id || '__trigger__')
 
   return {
     id: baseDsl.id || '',
@@ -137,15 +178,15 @@ export function flowToDsl(
 }
 
 /* ============================================================
- *  Helpers — Node factories
+ *  Node factories (position set by dagre later)
  * ============================================================ */
-function makeActionNode(id: string, step: StepDSL, x: number, y: number): Node<ActionNodeData> {
+function makeActionNode(id: string, step: StepDSL): Node<ActionNodeData> {
   return {
     id,
     type: 'action',
-    position: { x, y },
+    position: { x: 0, y: 0 },
     data: {
-      label: step.params?.label as string || step.id,
+      label: (step.params?.label as string) || step.id,
       stepType: step.type as StepType,
       stepId: step.id,
       params: step.params || {}
@@ -153,16 +194,11 @@ function makeActionNode(id: string, step: StepDSL, x: number, y: number): Node<A
   }
 }
 
-function makeConditionNode(
-  id: string,
-  step: StepDSL,
-  x: number,
-  y: number
-): Node<ConditionNodeData> {
+function makeConditionNode(id: string, step: StepDSL): Node<ConditionNodeData> {
   return {
     id,
     type: 'condition',
-    position: { x, y },
+    position: { x: 0, y: 0 },
     data: {
       label: (step.params?.label as string) || step.id,
       stepId: step.id,
@@ -171,11 +207,11 @@ function makeConditionNode(
   }
 }
 
-function makeDelayNode(id: string, step: StepDSL, x: number, y: number): Node<DelayNodeData> {
+function makeDelayNode(id: string, step: StepDSL): Node<DelayNodeData> {
   return {
     id,
     type: 'delay',
-    position: { x, y },
+    position: { x: 0, y: 0 },
     data: {
       label: (step.params?.label as string) || step.id,
       stepId: step.id,
@@ -184,11 +220,7 @@ function makeDelayNode(id: string, step: StepDSL, x: number, y: number): Node<De
   }
 }
 
-function makeEdge(
-  source: string,
-  target: string,
-  sourceHandle?: string
-): Edge {
+function makeEdge(source: string, target: string, sourceHandle?: string): Edge {
   const id = sourceHandle
     ? `e_${source}_${sourceHandle}_${target}`
     : `e_${source}_${target}`
@@ -197,9 +229,12 @@ function makeEdge(
     source,
     target,
     sourceHandle: sourceHandle || undefined,
-    type: 'smoothstep',
+    type: 'deletable',
     animated: true,
-    label: sourceHandle === 'true' ? 'Yes' : sourceHandle === 'false' ? 'No' : undefined,
+    data: {
+      label:
+        sourceHandle === 'true' ? 'Yes' : sourceHandle === 'false' ? 'No' : undefined
+    },
     style: sourceHandle === 'false' ? { stroke: '#ff4d4f' } : undefined
   }
 }
@@ -216,7 +251,7 @@ function nodeToStep(node: Node): StepDSL | null {
       return {
         id: ad.stepId || node.id,
         type: ad.stepType,
-        params: ad.params || {}
+        params: { ...ad.params, label: ad.label }
       }
     }
     case 'condition': {
@@ -224,7 +259,7 @@ function nodeToStep(node: Node): StepDSL | null {
       return {
         id: cd.stepId || node.id,
         type: 'condition',
-        params: { condition: cd.condition }
+        params: { condition: cd.condition, label: cd.label }
       }
     }
     case 'delay': {
@@ -232,7 +267,7 @@ function nodeToStep(node: Node): StepDSL | null {
       return {
         id: dd.stepId || node.id,
         type: 'delay',
-        params: { duration: dd.duration }
+        params: { duration: dd.duration, label: dd.label }
       }
     }
     default:
@@ -241,7 +276,7 @@ function nodeToStep(node: Node): StepDSL | null {
 }
 
 /* ============================================================
- *  Utility — generate unique IDs
+ *  Utilities
  * ============================================================ */
 let counter = 0
 export function generateNodeId(prefix = 'step'): string {

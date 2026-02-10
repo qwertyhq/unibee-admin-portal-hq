@@ -6,6 +6,7 @@ export type TriggerNodeData = {
   label: string
   triggerType: TriggerType
   event: string
+  execState?: 'running' | 'success' | 'failed'
 }
 
 type TriggerNodeType = Node<TriggerNodeData, 'trigger'>
@@ -18,16 +19,31 @@ const TRIGGER_ICONS: Record<TriggerType, string> = {
   manual: '▶️'
 }
 
+const TRIGGER_LABELS: Record<TriggerType, string> = {
+  webhook_event: 'Webhook',
+  bot_command: 'Bot Command',
+  button_click: 'Button Click',
+  schedule: 'Schedule',
+  manual: 'Manual'
+}
+
 const TriggerNode: React.FC<NodeProps<TriggerNodeType>> = ({ data, selected }) => {
+  const execCls = data.execState ? `exec-${data.execState}` : ''
+
   return (
-    <div className={`scenario-node trigger ${selected ? 'selected' : ''}`}>
-      <div className="node-header">
-        <span>{TRIGGER_ICONS[data.triggerType] || '⚡'}</span>
-        <span>Trigger</span>
-      </div>
-      <div className="node-body">
-        <div className="node-label">{data.label || data.triggerType}</div>
-        {data.event && <div className="node-detail">{data.event}</div>}
+    <div className={`n8n-node ${selected ? 'selected' : ''} ${execCls}`}>
+      <div className="node-accent accent-trigger" />
+      <div className="node-content">
+        <div className="node-icon icon-bg-trigger">
+          {TRIGGER_ICONS[data.triggerType] || '⚡'}
+        </div>
+        <div className="node-info">
+          <div className="node-title">
+            {data.label || TRIGGER_LABELS[data.triggerType] || 'Trigger'}
+          </div>
+          <div className="node-subtitle">{data.event || data.triggerType}</div>
+        </div>
+        {data.execState && <div className="node-status" />}
       </div>
       <Handle type="source" position={Position.Bottom} />
     </div>
