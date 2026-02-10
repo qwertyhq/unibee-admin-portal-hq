@@ -3163,3 +3163,165 @@ export const previewTelegramTemplateReq = async (body: {
     return [null, e]
   }
 }
+
+// ===================== Scenario Engine =====================
+
+export const getScenarioListReq = async (
+  params?: { page?: number; count?: number },
+  refreshCb?: () => void
+) => {
+  try {
+    const res = await request.get('/merchant/scenario/list', {
+      params,
+      paramsSerializer: serializeSearchParams
+    })
+    handleStatusCode(res.data.code, refreshCb)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getScenarioDetailReq = async (scenarioId: number) => {
+  try {
+    const res = await request.get('/merchant/scenario/detail', {
+      params: { scenarioId }
+    })
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const createScenarioReq = async (body: {
+  name: string
+  description: string
+  scenarioJson: string
+}) => {
+  try {
+    const res = await request.post('/merchant/scenario/new', body)
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const updateScenarioReq = async (body: {
+  scenarioId: number
+  name: string
+  description: string
+  scenarioJson: string
+}) => {
+  try {
+    const res = await request.post('/merchant/scenario/edit', body)
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const deleteScenarioReq = async (scenarioId: number) => {
+  try {
+    const res = await request.post('/merchant/scenario/delete', { scenarioId })
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const toggleScenarioReq = async (scenarioId: number, enabled: boolean) => {
+  try {
+    const res = await request.post('/merchant/scenario/toggle', {
+      scenarioId,
+      enabled
+    })
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const validateScenarioReq = async (scenarioJson: string) => {
+  try {
+    const res = await request.post('/merchant/scenario/validate', { scenarioJson })
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const testRunScenarioReq = async (scenarioId: number) => {
+  try {
+    const res = await request.post('/merchant/scenario/test_run', { scenarioId })
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getScenarioExecutionListReq = async (
+  params: { scenarioId?: number; page?: number; count?: number },
+  refreshCb?: () => void
+) => {
+  try {
+    const res = await request.get('/merchant/scenario/execution_list', {
+      params,
+      paramsSerializer: serializeSearchParams
+    })
+    handleStatusCode(res.data.code, refreshCb)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getScenarioExecutionDetailReq = async (executionId: number) => {
+  try {
+    const res = await request.get('/merchant/scenario/execution_detail', {
+      params: { executionId }
+    })
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getScenarioActionListReq = async () => {
+  try {
+    const res = await request.get('/merchant/scenario/action_list')
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}
+
+export const getScenarioTriggerListReq = async () => {
+  try {
+    const res = await request.get('/merchant/scenario/trigger_list')
+    handleStatusCode(res.data.code)
+    return [res.data.data, null]
+  } catch (err) {
+    const e = err instanceof Error ? err : new Error('Unknown error')
+    return [null, e]
+  }
+}

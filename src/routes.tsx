@@ -24,6 +24,7 @@ import WebhookLogs from './components/settings/webHooks/webhookLogs'
 import SendGridRecords from './components/settings/integrations/sendgrid/SendGridRecords'
 import VATSenseRecords from './components/settings/integrations/vatsense/VATSenseRecords'
 import RefundModule from './components/refund'
+import { ScenarioList, ScenarioDetail, ScenarioExecutions } from './components/scenario'
 import SubscriptionDetail from './components/subscription/detail'
 import SubscriptionList from './components/subscription/list'
 import UsageEvents from './components/subscription/usageEvents'
@@ -244,6 +245,30 @@ export const APP_ROUTES: RouteObject[] = [
     id: 'promo-credit',
     path: 'promo-credit',
     element: <PromoCredits />
+  },
+  {
+    id: 'scenario',
+    path: 'scenario',
+    element: <Outlet />,
+    children: [
+      { index: true, element: <Navigate to="list" replace /> },
+      {
+        path: 'list',
+        element: <ScenarioList />
+      },
+      {
+        path: 'new',
+        element: <ScenarioDetail />
+      },
+      {
+        path: ':scenarioId',
+        element: <ScenarioDetail />
+      },
+      {
+        path: ':scenarioId/executions',
+        element: <ScenarioExecutions />
+      }
+    ]
   },
   {
     id: 'activity-logs',

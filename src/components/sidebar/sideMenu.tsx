@@ -8,6 +8,7 @@ import MyAccountSvg from '@/assets/navIcons/myAccount.svg?react'
 import ProductPlanSvg from '@/assets/navIcons/productPlan.svg?react'
 import PromoCreditSvg from '@/assets/navIcons/promoCredit.svg?react'
 import ReportSvg from '@/assets/navIcons/report.svg?react'
+import ScenarioSvg from '@/assets/navIcons/scenario.svg?react'
 import SubscriptionSvg from '@/assets/navIcons/subscription.svg?react'
 import UserListSvg from '@/assets/navIcons/userList.svg?react'
 import RefundSvg from '@/assets/refund.svg?react'
@@ -125,6 +126,11 @@ const MENU_ITEMS: ItemType<MenuItemType>[] = [
     icon: <Icon component={ReportSvg} />
   },
   {
+    label: <NavLink to="scenario/list">Scenarios</NavLink>,
+    key: 'scenario',
+    icon: <Icon component={ScenarioSvg} />
+  },
+  {
     label: 'Configuration',
     key: 'configuration',
     icon: <Icon component={ConfigSvg} />
@@ -175,6 +181,8 @@ export const SideMenu = (props: MenuProps) => {
       activeKey = 'invoice';
     } else if (path.startsWith('user/')) {
       activeKey = 'user';
+    } else if (path.startsWith('scenario/')) {
+      activeKey = 'scenario';
     }
     
     setActiveMenuItem([activeKey]);
@@ -187,7 +195,7 @@ export const SideMenu = (props: MenuProps) => {
       selectedKeys={activeMenuItem}
       onClick={(e) => {
         // Check if the key belongs to an item with a NavLink
-        const isNavLinkItem = ['subscription', 'invoice', 'user'].includes(basePathName(e.key));
+        const isNavLinkItem = ['subscription', 'invoice', 'user', 'scenario'].includes(basePathName(e.key));
         // Only navigate for non-NavLink items
         if (!isNavLinkItem) {
           navigate(e.key);
